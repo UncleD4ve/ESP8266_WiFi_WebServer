@@ -1,7 +1,7 @@
 #include "WebServerController.h"
 using namespace std::placeholders;
 
-WebServerController::WebServerController() : _server(80), _webSocket(81), WiFiContr(){}
+WebServerController::WebServerController() : _server(80), _webSocket(81), WiFiContr() {}
 
 void WebServerController::beginOTA(const char * name, const char * pass) {
 	ArduinoOTA.setHostname(name);
@@ -83,7 +83,7 @@ bool WebServerController::handleFileRead(String path) {
 		return true;
 	}
 	yield();
-	if(path != F("/generate_204") && path != F("/connecttest.txt") && path != "/gen_204")
+	if (path != F("/generate_204") && path != F("/connecttest.txt") && path != "/gen_204")
 		Serial.println(PSTR("File Not Found: ") + path);
 	return false;
 }
@@ -135,20 +135,22 @@ void WebServerController::webSocketEvent(uint8_t num, WStype_t type, uint8_t * p
 		Serial.printf_P(PSTR("[%u] Connected from %d.%d.%d.%d url: %s\r\n"), num, ip[0], ip[1], ip[2], ip[3], payload);
 
 		staticIP = (WiFi.getMode() == 2 ? eeprom.getIp() : WiFi.localIP());
-		char * buff(webSocketInit());
+
+		char * buff(_webSocketOnInitFunction ? _webSocketOnInit() : webSocketInit());
 		strcat(buff, (eeprom.isStaticAddres() ? ",S," : ",D,"));
 		strcat(buff, staticIP.toString().c_str());
 
-		Serial.printf_P(PSTR("Init data: %s\n"),buff);
+		Serial.printf_P(PSTR("Init data: %s\n"), buff);
 		_webSocket.sendTXT(num, buff);
 		delete[] buff;
+		
 		break;
 	}
-	case WStype_TEXT:
+	case WStype_TEXT:	//TODO JSON
 		yield();
 		Serial.printf_P(PSTR("[%u] get Text: %s\r\n"), num, payload);
 
-		if (payload[0] == (char)255)
+		if (payload[0] == '}')
 		{
 			IPAddress ip;
 			ip.fromString((char*)&payload[1]);
@@ -159,42 +161,48 @@ void WebServerController::webSocketEvent(uint8_t num, WStype_t type, uint8_t * p
 			return;
 		}
 
-		if (payload[0] == (char)254) {
+		if (payload[0] == '{') {
+			
 			uint8_t button(atoi((char*)&payload[1]));
 			switch (button)
 			{
-				case 0:
-				{
-					WiFiContr.changeMode();
-					beginServer();
-					beginWebSocket();
-					yield();
-					return;
-				}
-				case 1:
-				{
-					WiFiContr.resetESP();
-					return;
-				}
-				case 2:
-				{
-					if (eeprom.setStaticAddres(false))
-						WiFiContr.resetESP();
-					return;
-				}
-				case 3:
-				{
-					ESP.deepSleep(0);
-					return;
-				}
-				default:
-				{
-					return;
-				}
+			case 0:
+			{
+				WiFiContr.changeMode(WIFI_AP_OR_STA,true);
+				beginServer();
+				beginWebSocket();
+				yield();
+				return;
+			}
+			case 1:
+			{
+				WiFiContr.resetESP();
+				return;
+			}
+			case 2:
+			{
+				if (eeprom.setStaticAddres(false))
+					WiFiContr.connect();
+				return;
+			}
+			case 3:
+			{
+				ESP.deepSleep(0);
+				return;
+			}
+			default:
+			{
+				return;
+			}
 			}
 		}
 
-		webSocketSwitch(payload[0],(uint8_t*)&payload[1]);
+		
+
+		if (_webSocketOnSwitchFunction) 
+			_webSocketOnSwitch(payload[0], (uint8_t*)&payload[1]);
+		else
+			webSocketSwitch(payload[0], (uint8_t*)&payload[1]);
 		break;
 	case WStype_BIN:
 		yield();
@@ -209,9 +217,22 @@ void WebServerController::webSocketEvent(uint8_t num, WStype_t type, uint8_t * p
 	}
 }
 
-void WebServerController::webSocketSwitch(uint8_t sign, uint8_t * payload){}
+void WebServerController::webSocketSwitch(uint8_t sign, uint8_t * payload) {}
 
-char * WebServerController::webSocketInit(){}
+char * WebServerController::webSocketInit() {}
+
+void WebServerController::webSocketOnInit(std::function<char *()> onInit)
+{
+	_webSocketOnInit = onInit;
+	_webSocketOnInitFunction = 1;
+}
+
+void WebServerController::webSocketOnSwitch(std::function<void(uint8_t sign, uint8_t*payload)> onSwitch)
+{
+	_webSocketOnSwitch = onSwitch;
+	_webSocketOnSwitchFunction = 1;
+}
+
 
 String WebServerController::formatBytes(size_t bytes) {
 	if (bytes < 1024)

@@ -65,19 +65,23 @@ void EEPROMController::displayWiFi()
 bool EEPROMController::setConfig(bool config)
 {
 	EEPROM[0] = config;
-	EEPROM[205] = 0;
 
-	EEPROM[1] = (char)90;
+	if (!config) {
+		EEPROM[205] = 0;	//Static addres
+		EEPROM[206] = 2;	//WiFi mode AP
+	}
+
+	EEPROM[1] = (char)90;	//todo
 	return EEPROM.commit();
 }
 
 void EEPROMController::resetConfig()
 {
 	bool response = setConfig(false);
-	Serial.print(F("EEPROM: "));
+	Serial.print(F("RESET ESP: "));
 	Serial.println(response);
 	WiFi.disconnect(true);
-	delay(100);
+	delay(200);
 	ESP.restart();
 }
 
@@ -94,6 +98,17 @@ bool EEPROMController::isStaticAddres()
 bool EEPROMController::setStaticAddres(bool status)
 {
 	EEPROM[205] = status;
+	return EEPROM.commit();
+}
+
+uint8_t EEPROMController::getWifiMode()
+{
+	return EEPROM[206];
+}
+
+bool EEPROMController::setWifiMode(uint8_t mode)
+{
+	EEPROM[206] = mode;
 	return EEPROM.commit();
 }
 

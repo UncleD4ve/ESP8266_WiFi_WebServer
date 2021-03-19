@@ -26,13 +26,16 @@ public:
 	void handleClientLoop();
 	void otaLoop();
 
+	void webSocketOnInit(std::function<char *()>);
+	void webSocketOnSwitch(std::function<void(uint8_t sign, uint8_t * payload)>);
+
 	WiFiController WiFiContr;
 	EEPROMController eeprom;
 private:
 	ESP8266WebServer _server;
 	WebSocketsServer _webSocket;
 	File _fsUploadFile;
-	
+
 	uint32_t dieTimer = 0;
 	uint8_t  dieCounter = 0;
 
@@ -43,6 +46,11 @@ private:
 	void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
 	String formatBytes(size_t);
 	String getContentType(String);
+
+	std::function<char *()> _webSocketOnInit;
+	bool _webSocketOnInitFunction = 0;
+	std::function<void(uint8_t sign, uint8_t * payload)> _webSocketOnSwitch;
+	bool _webSocketOnSwitchFunction = 0;
 
 	char buffer[5];
 };
