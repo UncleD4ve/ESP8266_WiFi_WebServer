@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport'>
+    <title>HTML Uploader</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <meta name="theme-color" content="#00878f">
+
+<style>
+center{width:420px;max-width:100%;margin:0 auto;font-family:Roboto,sans-serif;color:#444}header{background-color:#00878f;color:#fff;padding:6px;font-family:Roboto,sans-serif;box-shadow:1px 1px 5px #555;position:relative}h1{margin:0;font-family:Roboto,sans-serif;font-size:32}center>div{padding:24px 10px 10px 10px;box-shadow:1px 1px 5px #555}table{margin:0 24px 0 12px}td{color:#555;width:100%}tr{width:100%}.button{text-decoration:none;border:none;color:#fff;background-color:#00878f;padding:6px 24px;font-size:16px;cursor:pointer;box-shadow:1px 1px 6px #555;outline:0;margin:12px auto 0 auto;display:inline-block}.button:hover{box-shadow:1px 1px 3px #444}input[type=range]{-webkit-appearance:none;outline:0;width:100%;margin:6px}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;border:0;height:15px;width:15px;margin-top:-6px;border-radius:7.5px}input.disabled[type=range]::-webkit-slider-thumb{background:#999}input.enabled[type=range]::-webkit-slider-thumb{background:#00878f;cursor:pointer;box-shadow:1px 1px 2px #777,0 0 1px #777}input[type=range]::-webkit-slider-runnable-track{width:inherit;height:4px;background:#ccc;border-radius:1px}input.enabled[type=range]::-webkit-slider-runnable-track{cursor:pointer}
+</style>
+
+</head>
+<body>
+	<center>
+        <header>
+            <h1>HTML Uploader</h1>
+        </header>
+        <div>
+            <p style="text-align: left">Use this page to upload new files to the ESP8266.<br/>You can use compressed (deflated) files (files with a .gz extension) to save space and bandwidth.</p>
+            <form method="post" enctype="multipart/form-data" style="margin: 0px auto 8px auto" >
+                <input type="file" name="Choose file" accept=".gz,.html,.ico,.js,.css">
+                <input class="button" type="submit" value="Upload" name="submit">
+            </form>            
+        </div>
+	</center>
+</body>
+</html>
