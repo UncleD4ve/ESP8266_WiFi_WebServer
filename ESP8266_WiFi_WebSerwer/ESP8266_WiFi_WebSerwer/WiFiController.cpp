@@ -4,28 +4,23 @@ WiFiController::WiFiController(){}
 
 bool WiFiController::begin(const char* SSID, int8_t mode, bool wake)
 {
-	_apName = SSID; _mode = mode;
+	_apName = SSID; 
+	_mode = mode != WIFI_AP_OR_STA ? mode : eeprom.getWifiMode();
 	bool status(false);
-	if (!eeprom.getConfig())
-	{
-		WiFiRegister WiFiReg(_apName);
-		WiFiReg.begin();
-	}
-	else
-	{
-		pinMode(14, INPUT);
-		if (digitalRead(14) == LOW)
-			eeprom.resetConfig();
+	
+	pinMode(14, INPUT);
+	if (digitalRead(14) == LOW)
+		eeprom.resetConfig();
 
-		eeprom.readWifi(_ssid, _pass);
+	eeprom.readWifi(_ssid, _pass);
 
-		if (wake)
-		{
-			WiFi.forceSleepWake();
-			yield();
-			status = connect();
-		}
+	if (wake)
+	{
+		WiFi.forceSleepWake();
+		yield();
+		status = connect();
 	}
+	
 	return status;
 }
 
@@ -76,7 +71,7 @@ bool WiFiController::connect()
 	return false;
 }
 
-bool WiFiController::changeMode(int8_t mode)
+bool WiFiController::changeMode(int8_t mode, bool save)
 {
 	if (mode == WIFI_AP_OR_STA)
 		if (WiFi.getMode() == WIFI_AP)
@@ -90,11 +85,18 @@ bool WiFiController::changeMode(int8_t mode)
 	else
 		_mode = mode;
 
+	if (save) eeprom.setWifiMode(_mode);
 	return connect();
 }
 
 bool WiFiController::modeSTA()
 {
+	if (!eeprom.getConfig() && (_mode == WIFI_STA_MODE || _mode == WIFI_STA_AP_MODE))
+	{
+		WiFiRegister WiFiReg(_apName);
+		WiFiReg.begin();
+	}
+
 	uint32_t time1 = system_get_time(), time2;
 	WiFi.persistent(false);
 	WiFi.disconnect();

@@ -15,11 +15,11 @@ enum WiFiControllerMode {
 class WiFiController {
 public:
 	WiFiController();
-	bool begin(const char* SSID, int8_t mode = WIFI_AP_MODE, bool wake = true);
+	bool begin(const char* SSID, int8_t mode = WIFI_AP_OR_STA, bool wake = true);
 	void forceWifiERegister();
 	bool connect();
 	bool checkInternet();
-	bool changeMode(int8_t mode = WIFI_AP_OR_STA);
+	bool changeMode(int8_t mode = WIFI_AP_OR_STA, bool save = false);
 	void dnsLoop();
 	void resetESP();
 

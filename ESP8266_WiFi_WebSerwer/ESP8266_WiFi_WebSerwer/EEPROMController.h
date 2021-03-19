@@ -15,6 +15,8 @@ public:
 	bool getConfig();
 	bool isStaticAddres();
 	bool setStaticAddres(bool);
+	uint8_t getWifiMode();
+	bool setWifiMode(uint8_t mode);
 	bool setIpConfig();
 	IPAddress getIp();
 	IPAddress getGateway();

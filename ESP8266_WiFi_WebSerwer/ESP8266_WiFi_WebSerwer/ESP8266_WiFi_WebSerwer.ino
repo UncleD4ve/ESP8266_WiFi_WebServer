@@ -9,76 +9,136 @@ uint8_t position(0), destPosition(0), dieCounter(0);
 
 bool changeButton(false);
 
-class OwnWebServer : public WebServerController {
-public:
-	uint8_t & _position = position;
-	uint8_t & _destPosition = destPosition;
-	bool & _changeButton = changeButton;
 
-	OwnWebServer() : WebServerController()
-	{
-		eeprom.getVar(1, _position);
-		_destPosition = _position;
+WebServerController WebServerContr;
+
+char * ownWebSocketOnInit() {
+	uint8_t saveA;
+	char * buff = new char[40];
+	WebServerContr.eeprom.getVar(1, saveA);
+	sprintf_P(buff, PSTR("I%d,%d,%d"), position, saveA, changeButton);
+	return buff;
+}
+
+void ownWebSocketOnSwitch(uint8_t sign, uint8_t * payload) {
+
+	if (sign == 'a') {
+		destPosition = atoi((char*)&payload[0]);
+		return;
 	}
 
-	char * webSocketInit() override {
-		uint8_t saveA;
-		char * buff = new char[40];
-		eeprom.getVar(1, saveA);
-		sprintf_P(buff, PSTR("I%d,%d,%d"), _position, saveA, _changeButton);
-		return buff;
-	}
-
-	void webSocketSwitch(uint8_t sign, uint8_t * payload) override{
-
-		if (sign == 'a') {
-			_destPosition = atoi((char*)&payload[0]);
-			return;
+	if (sign == 'b') {
+		uint8_t button(atoi((char*)&payload[0]));
+		switch (button)
+		{
+		case 0:
+		{
+			WebServerContr.eeprom.setVar(1, position);
+			WebServerContr.webSocketSend('B', position);
+			break;
 		}
-
-		if (sign == 'b') {
-			uint8_t button(atoi((char*)&payload[0]));
-			switch (button)
-			{
-				case 0:
-				{
-					eeprom.setVar(1, _position);
-					webSocketSend('B', _position);
-					break;
-				}
-				case 1:
-				{
-					eeprom.getVar(1, _destPosition);
-					Serial.printf_P(PSTR("Restore Value: %d\n"), _destPosition);
-					break;
-				}
-				case 2:
-				{
-					_changeButton = !_changeButton;
-					Serial.printf_P(PSTR("Change Button: %d\n"), _changeButton);
-					webSocketSend('C', _changeButton);
-					break;
-				}
-				case 3:
-				{
-					Serial.println(F("Click Button"));
-					digitalWrite(BUILTIN_LED, LOW);
-					delay(500);
-					digitalWrite(BUILTIN_LED, HIGH);
-					break;
-				}
-				default:
-				{
-					break;
-				}
-			}
-			yield();
-			return;
+		case 1:
+		{
+			WebServerContr.eeprom.getVar(1, destPosition);
+			Serial.printf_P(PSTR("Restore Value: %d\n"), destPosition);
+			break;
 		}
-
-
+		case 2:
+		{
+			changeButton = !changeButton;
+			Serial.printf_P(PSTR("Change Button: %d\n"), changeButton);
+			WebServerContr.webSocketSend('C', changeButton);
+			break;
+		}
+		case 3:
+		{
+			Serial.println(F("Click Button"));
+			digitalWrite(BUILTIN_LED, LOW);
+			delay(500);
+			digitalWrite(BUILTIN_LED, HIGH);
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
+		yield();
+		return;
 	}
-}WebServerContr;
+}
+
+
+//class OwnWebServer : public WebServerController {
+//public:
+//	uint8_t & _position = position;
+//	uint8_t & _destPosition = destPosition;
+//	bool & _changeButton = changeButton;
+//
+//	OwnWebServer() : WebServerController()
+//	{
+//		eeprom.getVar(1, _position);
+//		_destPosition = _position;
+//	}
+//
+//	char * webSocketInit() override {
+//		uint8_t saveA;
+//		char * buff = new char[40];
+//		eeprom.getVar(1, saveA);
+//		sprintf_P(buff, PSTR("I%d,%d,%d"), _position, saveA, _changeButton);
+//		return buff;
+//	}
+//
+//	void webSocketSwitch(uint8_t sign, uint8_t * payload) override {
+//
+//		if (sign == 'a') {
+//			_destPosition = atoi((char*)&payload[0]);
+//			return;
+//		}
+//
+//		if (sign == 'b') {
+//			uint8_t button(atoi((char*)&payload[0]));
+//			switch (button)
+//			{
+//			case 0:
+//			{
+//				eeprom.setVar(1, _position);
+//				webSocketSend('B', _position);
+//				break;
+//			}
+//			case 1:
+//			{
+//				eeprom.getVar(1, _destPosition);
+//				Serial.printf_P(PSTR("Restore Value: %d\n"), _destPosition);
+//				break;
+//			}
+//			case 2:
+//			{
+//				_changeButton = !_changeButton;
+//				Serial.printf_P(PSTR("Change Button: %d\n"), _changeButton);
+//				webSocketSend('C', _changeButton);
+//				break;
+//			}
+//			case 3:
+//			{
+//				Serial.println(F("Click Button"));
+//				digitalWrite(BUILTIN_LED, LOW);
+//				delay(500);
+//				digitalWrite(BUILTIN_LED, HIGH);
+//				break;
+//			}
+//			default:
+//			{
+//				break;
+//			}
+//			}
+//			yield();
+//			return;
+//		}
+//
+//
+//	}
+//}WebServerContr;
 
 
 void preinit() {
@@ -102,7 +162,13 @@ void setup()
 
 	pinMode(BUILTIN_LED, OUTPUT);
 	digitalWrite(BUILTIN_LED, HIGH);
+
+	WebServerContr.eeprom.getVar(1, destPosition);
+	WebServerContr.webSocketOnInit(ownWebSocketOnInit);
+	WebServerContr.webSocketOnSwitch(ownWebSocketOnSwitch);
+
 }
+
 void loop()
 {
 	yield();
