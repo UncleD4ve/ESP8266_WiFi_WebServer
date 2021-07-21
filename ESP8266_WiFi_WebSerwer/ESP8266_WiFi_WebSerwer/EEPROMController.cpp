@@ -66,10 +66,8 @@ bool EEPROMController::setConfig(bool config)
 {
 	EEPROM[0] = config;
 
-	if (!config) {
-		EEPROM[205] = 0;	//Static addres
-		EEPROM[206] = 2;	//WiFi mode AP
-	}
+	EEPROM[205] = 0;	//Static addres
+	EEPROM[206] = 2;	//WiFi mode AP
 
 	EEPROM[1] = (char)90;	//todo
 	return EEPROM.commit();
@@ -78,8 +76,8 @@ bool EEPROMController::setConfig(bool config)
 void EEPROMController::resetConfig()
 {
 	bool response = setConfig(false);
-	Serial.print(F("RESET ESP: "));
-	Serial.println(response);
+	Serial.print(F("RESET Config: "));
+	Serial.println(response ? F("Success") : F("Error"));
 	WiFi.disconnect(true);
 	delay(200);
 	ESP.restart();
