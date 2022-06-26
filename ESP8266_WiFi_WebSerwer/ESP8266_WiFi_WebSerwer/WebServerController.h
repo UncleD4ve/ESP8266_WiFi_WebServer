@@ -17,6 +17,7 @@ public:
 	void beginServer();
 
 	void webSocketSend(char sign, uint8_t num);
+	void webSocketSendText(char * text);
 	void PreventEspStuck();
 
 	virtual void webSocketSwitch(uint8_t, uint8_t*);

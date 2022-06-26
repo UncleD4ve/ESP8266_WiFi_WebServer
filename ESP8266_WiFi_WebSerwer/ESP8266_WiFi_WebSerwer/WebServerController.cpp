@@ -281,6 +281,12 @@ void WebServerController::webSocketSend(char sign, uint8_t num) {
 	yield();
 }
 
+void WebServerController::webSocketSendText(char * text) {
+	yield();
+	_webSocket.broadcastTXT(text);
+	yield();
+}
+
 void WebServerController::PreventEspStuck() {
 	if (millis() - dieTimer >= 3000) {
 		if (++dieCounter > 1)

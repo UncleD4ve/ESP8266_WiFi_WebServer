@@ -1,16 +1,21 @@
 #include "WiFiController.h"
 
-WiFiController::WiFiController(){}
+WiFiController::WiFiController() {}
 
 bool WiFiController::begin(const char* SSID, int8_t mode, bool wake)
 {
-	_apName = SSID; 
+	_apName = SSID;
 	_mode = mode != WIFI_AP_OR_STA ? mode : eeprom.getWifiMode();
 	bool status(false);
-	
+
 	pinMode(14, INPUT);
-	if (digitalRead(14) == LOW)
+	if (digitalRead(14) == LOW) {
+		pinMode(BUILTIN_LED, OUTPUT);
+		digitalWrite(BUILTIN_LED, LOW);
+		while (digitalRead(14) == LOW) yield();
+		digitalWrite(BUILTIN_LED, HIGH);
 		eeprom.resetConfig();
+	}
 
 	eeprom.readWifi(_ssid, _pass);
 
@@ -20,7 +25,7 @@ bool WiFiController::begin(const char* SSID, int8_t mode, bool wake)
 		yield();
 		status = connect();
 	}
-	
+
 	return status;
 }
 
@@ -35,38 +40,38 @@ bool WiFiController::connect()
 	yield();
 	switch (_mode)
 	{
-		case WIFI_STA_AP_MODE:
-		{	
-			if (WiFi.status() == WL_CONNECTED)
-				return true;
-
-			if(WiFi.getMode() == WIFI_AP)
-				WiFi.softAPdisconnect();
-			yield();
-
-			bool status(true);
-			if (!modeSTA())
-				status = modeAP();
-
-			return status;
-		}
-		case WIFI_STA_MODE:
-		{
-			if (WiFi.status() != WL_CONNECTED)
-				while (!modeSTA())
-					delay(1000);
+	case WIFI_STA_AP_MODE:
+	{
+		if (WiFi.status() == WL_CONNECTED)
 			return true;
-		}
-		case WIFI_AP_MODE:
-		{
-			while (!modeAP())
+
+		if (WiFi.getMode() == WIFI_AP)
+			WiFi.softAPdisconnect();
+		yield();
+
+		bool status(true);
+		if (!modeSTA())
+			status = modeAP();
+
+		return status;
+	}
+	case WIFI_STA_MODE:
+	{
+		if (WiFi.status() != WL_CONNECTED)
+			while (!modeSTA())
 				delay(1000);
-			return true;
-		}
-		default:
-		{
-			resetESP();
-		}
+		return true;
+	}
+	case WIFI_AP_MODE:
+	{
+		for (uint i(0); i < 3; ++i)
+			if (modeAP()) return true;
+		resetESP();
+	}
+	default:
+	{
+		eeprom.resetConfig();
+	}
 	}
 	return false;
 }
@@ -151,7 +156,7 @@ bool WiFiController::modeAP()
 		Serial.println(_apName);
 		return true;
 	}
-	else 
+	else
 		Serial.println(F("AP mode: false"));
 	return false;
 }

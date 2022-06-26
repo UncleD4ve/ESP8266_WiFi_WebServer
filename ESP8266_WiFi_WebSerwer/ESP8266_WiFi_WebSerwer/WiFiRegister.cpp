@@ -1,7 +1,7 @@
 #include "WiFiRegister.h"
 
 WiFiRegister::WiFiRegister(const char * ssid) :_server(80), _apName(ssid) {}
-WiFiRegister::WiFiRegister() : _server(80) {}
+WiFiRegister::WiFiRegister() : _server(80), _apName(NULL) {}
 
 void WiFiRegister::begin()
 {
@@ -18,7 +18,7 @@ void WiFiRegister::begin()
 	dnsServer.setTTL(1);
 	dnsServer.start(53, "*", apIP);
 
-	if (WiFi.softAP(strlen(_apName) == 0 ? String(F("ESP WiFi Register")) : _apName)) {
+	if (WiFi.softAP(!_apName ? String(F("ESP WiFi Register")) : _apName)) {
 		Serial.print(F("\nWifi Register\nAccess Point name: "));
 		Serial.print(WiFi.softAPSSID());
 		Serial.print(F("\nIP addres:"));
