@@ -32,12 +32,13 @@ WebServerController& WebServerController::beginOTA(uint8_t minutes, const char *
 
 WebServerController& WebServerController::beginSPIFFS() {
 	SPIFFS.begin();
-	Serial.println(F("\nSPIFFS started. Contents:"));
+	debuglnF("\nSPIFFS started. Contents:");
 	{
 		Dir dir = SPIFFS.openDir(F("/"));
-		while (dir.next())
-			Serial.println(PSTR("FS File: ") + dir.fileName() + PSTR(", size: ") + formatBytes(dir.fileSize()));
-		Serial.println(F("End of content."));
+		while (dir.next()) {
+			debugln(PSTR("FS File: ") + dir.fileName() + PSTR(", size: ") + formatBytes(dir.fileSize()));
+		}
+		debuglnF("End of content.");
 	}
 	
 	yield();
@@ -73,13 +74,13 @@ void WebServerController::onWsEvent(AsyncWebSocket * server, AsyncWebSocketClien
 		debugf(PSTR("%s%s}\n"),systemMsg, userMsg.c_str());
 	}
 	else if (type == WS_EVT_DISCONNECT) {
-		Serial.printf("ws[%s][%u] disconnect\n", server->url(), client->id());
+		debugf(PSTR("ws[%s][%u] disconnect\n"), server->url(), client->id());
 	}
 	else if (type == WS_EVT_ERROR) {
-		Serial.printf("ws[%s][%u] error(%u): %s\n", server->url(), client->id(), *((uint16_t*)arg), (char*)data);
+		debugf(PSTR("ws[%s][%u] error(%u): %s\n"), server->url(), client->id(), *((uint16_t*)arg), (char*)data);
 	}
 	else if (type == WS_EVT_PONG) {
-		Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len) ? (char*)data : "");
+		debugf(PSTR("ws[%s][%u] pong[%u]: %s\n"), server->url(), client->id(), len, (len) ? (char*)data : "");
 	}
 	else if (type == WS_EVT_DATA) {
 		AwsFrameInfo * info = (AwsFrameInfo*)arg;
@@ -108,12 +109,7 @@ void WebServerController::onWsEvent(AsyncWebSocket * server, AsyncWebSocketClien
 				else {
 					debugf("Event %s not found. %d events available\n", event, _wsOnEvent.size());
 				}
-
 			}
-
-
-			
-				
 		}
 	}
 }
@@ -134,24 +130,24 @@ WebServerController& WebServerController::beginWsServer() {
 		wsAction = SERVER_WS_SAVE_RESTART;
 	});
 
-	addWsEvent("_changeWiFiMode_", [&](void * arg, uint8_t *data, size_t len) {
+	addWsEvent(PSTR("_changeWiFiMode_"), [&](void * arg, uint8_t *data, size_t len) {
 		wsAction = SERVER_WS_CHANGE_WIFI_MODE;
 	});
 
-	addWsEvent("_setWiFiMode_", [&](void * arg, uint8_t *data, size_t len) {
+	addWsEvent(PSTR("_setWiFiMode_"), [&](void * arg, uint8_t *data, size_t len) {
 		wsAction = SERVER_WS_SET_WIFI_MODE;
 	});
 
-	addWsEvent("_changeWiFiConn_", [&](void * arg, uint8_t *data, size_t len) {
+	addWsEvent(PSTR("_changeWiFiConn_"), [&](void * arg, uint8_t *data, size_t len) {
 		storage::setWifiStStaticSettings(false);
 		wsAction = SERVER_WS_SAVE_RESTART;
 	});
 
-	addWsEvent("_restart_", [&](void * arg, uint8_t *data, size_t len) {
+	addWsEvent(PSTR("_restart_"), [&](void * arg, uint8_t *data, size_t len) {
 		wsAction = SERVER_WS_RESTART;
 	});
 
-	addWsEvent("_turnOff_", [&](void * arg, uint8_t *data, size_t len) {
+	addWsEvent(PSTR("_turnOff_"), [&](void * arg, uint8_t *data, size_t len) {
 		wsAction = SERVER_WS_TURN_OFF;
 	});
 
@@ -230,157 +226,6 @@ WebServerController& WebServerController::beginServer(bool editor) {
 	yield();
 	return *this;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//void WebServerController::handleFileUpload() {
-//	_server.send(200, F("text/plain"), "");
-//	HTTPUpload& upload = _server.upload();
-//	String path;
-//	if (upload.status == UPLOAD_FILE_START) {
-//		path = upload.filename;
-//		if (!path.startsWith("/")) path = "/" + path;
-//		if (!path.endsWith(".gz")) {
-//			String pathWithGz = path + ".gz";
-//			if (SPIFFS.exists(pathWithGz))
-//				SPIFFS.remove(pathWithGz);
-//		}
-//		Serial.print(F("handleFileUpload Name: ")); Serial.println(path);
-//		_fsUploadFile = SPIFFS.open(path, "w");
-//		path = String();
-//	}
-//	else if (upload.status == UPLOAD_FILE_WRITE) {
-//		if (_fsUploadFile)
-//			_fsUploadFile.write(upload.buf, upload.currentSize);
-//	}
-//	else if (upload.status == UPLOAD_FILE_END) {
-//		if (_fsUploadFile) {
-//			_fsUploadFile.close();
-//			Serial.print(F("handleFileUpload Size: ")); Serial.println(upload.totalSize);
-//			_server.sendHeader(F("Location"), F("/success.html"));
-//			_server.send(303);
-//		}
-//		else {
-//			_server.send(500, F("text/plain"), F("500: couldn't create file"));
-//		}
-//	}
-//}
-
-//void WebServerController::webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
-//	Serial.println(F("\nwebSocketEvent"));
-//	switch (type) {
-//	case WStype_DISCONNECTED:
-//		yield();
-//		Serial.printf_P(PSTR("[%u] Disconnected!\n"), num);
-//		break;
-//	case WStype_CONNECTED:
-//	{
-//		yield();
-//		//IPAddress ip = _webSocket.remoteIP(num), staticIP;
-//		IPAddress ip , staticIP;
-//
-//		Serial.printf_P(PSTR("[%u] Connected from %d.%d.%d.%d url: %s\r\n"), num, ip[0], ip[1], ip[2], ip[3], payload);
-//
-//		staticIP = (WiFi.getMode() == 2 ? storage::getWifiStSettings().ip : WiFi.localIP());
-//
-//		char * buff(_webSocketOnInitFunction ? _webSocketOnInit() : webSocketInit());
-//		strcat(buff, (storage::getWifiStSettings().static_ip ? ",S," : ",D,"));
-//		strcat(buff, staticIP.toString().c_str());
-//
-//		Serial.printf_P(PSTR("Init data: %s\n"), buff);
-//		//_webSocket.sendTXT(num, buff);
-//		delete[] buff;
-//		
-//		break;
-//	}
-//	case WStype_TEXT:	//TODO JSON
-//		yield();
-//		Serial.printf_P(PSTR("[%u] get Text: %s\r\n"), num, payload);
-//
-//		if (payload[0] == '}')
-//		{
-//			IPAddress ip;
-//			ip.fromString((char*)&payload[1]);
-//			Serial.println(ip);
-//			storage::setWifiStStaticIpSettings(ip);
-//			storage::setWifiStStaticSettings(true); //
-//			storage::save();
-//			WiFiContr.restartESP();
-//
-//			return;
-//		}
-//
-//		if (payload[0] == '{') {
-//			
-//			uint8_t button(atoi((char*)&payload[1]));
-//			switch (button)
-//			{
-//			case 0:
-//			{
-//				WiFiContr.changeMode(WIFI_AP_OR_STA,true);
-//				beginServer();
-//				beginWebSocket();
-//				yield();
-//				return;
-//			}
-//			case 1:
-//			{
-//				WiFiContr.restartESP();
-//				return;
-//			}
-//			case 2:
-//			{
-//				storage::setWifiStStaticSettings(false); //
-//				if (storage::save())
-//					WiFiContr.connect();
-//				return;
-//			}
-//			case 3:
-//			{
-//				ESP.deepSleep(0);
-//				return;
-//			}
-//			default:
-//			{
-//				return;
-//			}
-//			}
-//		}
-//
-//		
-//
-//		if (_webSocketOnSwitchFunction) 
-//			_webSocketOnSwitch(payload[0], (uint8_t*)&payload[1]);
-//		else
-//			webSocketSwitch(payload[0], (uint8_t*)&payload[1]);
-//		break;
-//
-//	case WStype_BIN:
-//		yield();
-//		Serial.println(F("Get binary"));
-//		hexdump(payload, length);
-//		//_webSocket.sendBIN(num, payload, length);
-//		break;
-//	default:
-//		yield();
-//		Serial.println(F("Invalid WStype"));
-//		break;
-//	}
-//}
 
 String WebServerController::formatBytes(size_t bytes) {
 	if (bytes < 1024)
@@ -478,8 +323,3 @@ void WebServerController::resetConnectionByTime(uint16_t minutes)
 		yield();
 	}
 }
-
-
-
-
-

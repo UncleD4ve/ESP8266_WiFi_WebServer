@@ -12,6 +12,8 @@ void preinit() {
 
 WebServerController WebServerContr;
 
+// Example variables
+
 Adafruit_NeoPixel led(40, D2, NEO_GRB + NEO_KHZ800);
 uint8_t red(0), green(0), blue(0);
 
@@ -29,6 +31,7 @@ enum wsEvents {
 }; 
 uint8_t wsEvent = WS_NULL;
 
+// End of example variables
 
 void setup()
 {
@@ -155,7 +158,8 @@ void changeColor() {
 
 
 
-//// Var examples
+// Var examples
+
 //int integer = 123456789;
 //storage::addVar("intiger", integer);
 
@@ -166,9 +170,7 @@ void changeColor() {
 //storage::addVar("str", str);
 //str[0] = '1'; str[1] = '2'; str[2] = '3';
 
-
 ////storage::saveVar("str", str);
-
 
 //debugf(PSTR("Storage get Int: %d\n"),storage::getVar("intiger", integer));
 //debugf(PSTR("Storage get char: %d\n"), storage::getVar("char", character));
