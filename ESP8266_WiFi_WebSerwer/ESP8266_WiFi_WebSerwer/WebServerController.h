@@ -1,58 +1,72 @@
+#pragma once
+
 #ifndef WebServerController_h
 #define WebServerController_h
+
 #include "Arduino.h"
-#include <ArduinoOTA.h>
-#include <ESP8266WebServer.h>
-#include <FS.h>
-#include <WebSocketsServer.h>
 #include "WiFiController.h"
+#include "StorageController.h"
+#include "debug.h"
+
+#include <ArduinoOTA.h>
+#include <FS.h>
+#include <map>
 #include <DNSServer.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <SPIFFSEditor.h>
+
+enum wsActionEnum {
+	SERVER_WS_NULL = 0,
+	SERVER_WS_CHANGE_WIFI_MODE = 1,
+	SERVER_WS_RESTART = 2,
+	SERVER_WS_SAVE_RESTART = 3,
+	SERVER_WS_CHANGE_WIFI_CONNECTION = 4,
+	SERVER_WS_TURN_OFF = 5,
+	SERVER_WS_SET_WIFI_MODE = 6,
+};
 
 class WebServerController {
 public:
 	WebServerController();
-	void beginOTA(const char*, const char*);
-	void beginSPIFFS();
-	void beginWebSocket();
-	void beginServer();
+	WebServerController& beginOTA(uint8_t minutes, const char* PROGMEM = OTA_SSID, const char* PROGMEM = OTA_PASSWD);
+	WebServerController& beginSPIFFS();
+	WebServerController& beginWsServer();
+	WebServerController& beginServer(bool editor = false);
 
 	void webSocketSend(char sign, uint8_t num);
 	void webSocketSendText(char * text);
 	void PreventEspStuck();
+	void resetConnectionByTime(uint16_t minutes = 5);
 
-	virtual void webSocketSwitch(uint8_t, uint8_t*);
-	virtual char * webSocketInit();
+	void WebServerLoop(bool PreventEspStuck = true, bool resetConnectionByTime = false);
 
-	void webSocketLoop();
-	void handleClientLoop();
-	void otaLoop();
-
-	void webSocketOnInit(std::function<char *()>);
-	void webSocketOnSwitch(std::function<void(uint8_t sign, uint8_t * payload)>);
+	void addWsInitial(const char*, std::function<String()>);
+	void addWsEvent(const char *, std::function<void(void *, uint8_t *, size_t)>);
 
 	WiFiController WiFiContr;
-	EEPROMController eeprom;
+	AsyncWebSocket ws;
 private:
-	ESP8266WebServer _server;
-	WebSocketsServer _webSocket;
+	struct str_cmp{ bool operator()(char const *a, char const *b) const { return strcmp(a, b) < 0; } };
+
+	std::map<const char *, std::function<String()>> _wsInitial;
+	std::map<const char *, std::function<void(void *, uint8_t *, size_t)>, str_cmp> _wsOnEvent;
+	
+	AsyncWebServer server;
+
 	File _fsUploadFile;
 
 	uint32_t dieTimer = 0;
+	uint32_t wiFiTimer = 0;
+	uint32_t _otaTimer = 0;
 	uint8_t  dieCounter = 0;
 
-	void handleRoot();
-	void handleFileUpload();
-	bool handleFileRead(String);
-
-	void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
-	String formatBytes(size_t);
-	String getContentType(String);
-
-	std::function<char *()> _webSocketOnInit;
-	bool _webSocketOnInitFunction = 0;
-	std::function<void(uint8_t sign, uint8_t * payload)> _webSocketOnSwitch;
-	bool _webSocketOnSwitchFunction = 0;
-
 	char buffer[5];
+
+	uint8_t wsAction = 0;
+	bool _otaStatus = false;
+
+	void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
+	String formatBytes(size_t);
 };
 #endif

@@ -71,7 +71,7 @@ var lastSend = 0;
 rangeSlider.addEventListener("input", sendVolume, false);
 
 function initWebSocket() {
-    webSocket = new WebSocket("ws:" + "/" + window.location.hostname + ':81/');
+    webSocket = new WebSocket('ws://'+document.location.host+'/ws');
     webSocket.onopen = function (evt) {
       console.log('WebSocket open');
 

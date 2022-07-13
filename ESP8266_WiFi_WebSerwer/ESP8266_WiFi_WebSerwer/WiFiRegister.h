@@ -1,13 +1,21 @@
+#pragma once
+
 #ifndef WiFiRegister_h
 #define WiFiRegister_h
 #include "Arduino.h"
-#include "indexBegin.h"
-#include "indexEnd.h"
 #include "WiFiRegister.h"
+#include "StorageController.h"
+#include "debug.h"
+
 #include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
+#include <ESPAsyncWebServer.h>
 #include <DNSServer.h>
-#include "EEPROMController.h"
+
+enum action {
+	MODE_DEFAULT = 0,
+	MODE_CONNECTION= 1,
+	MODE_RESTART = 2,
+};
 
 class WiFiRegister {
 public:
@@ -15,13 +23,15 @@ public:
 	WiFiRegister();
 	void begin();
 private:
-	ESP8266WebServer _server;
+	AsyncWebServer _server;
 	DNSServer dnsServer;
 	WiFiClient _client;
-	String _ssid;
-	String _pass;
+	char _ssid[33];
+	char _pass[65];
 	const char * _apName;
 	char _status[13];
+
+	uint8_t action = 0;
 
 	uint8_t encryptionTypeStr(uint8_t);
 	uint8_t encryptionPowerStr(int8_t);
@@ -29,8 +39,6 @@ private:
 	String constructHTMLpage();
 
 	void ssidFromWeb();
-	void handleRoot();
-	void status();
 	void restart();
 };
 #endif

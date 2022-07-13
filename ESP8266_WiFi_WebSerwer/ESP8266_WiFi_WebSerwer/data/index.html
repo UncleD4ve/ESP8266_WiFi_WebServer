@@ -1,0 +1,279 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>IoT WebServer</title>
+
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link href="font.css" rel="stylesheet" type="text/css" />
+    <link href="bootstrap.min.css" rel="stylesheet" />
+    <link href="customCss.css" rel="stylesheet" />
+</head>
+
+<body id="page-top" class="height-nav">
+    <!-- Navigation-->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNav">
+        <div class="container">
+            <a id="projectNavbar" class="navbar-brand js-scroll-trigger" href="#page-top">IoT WebServer</a>
+            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+                data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto my-2 my-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link js-scroll-trigger" href="#api">Api</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link js-scroll-trigger" href="#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Masthead-->
+    <header class="masthead vh-100">
+        <div class="container h-100">
+            <div class="row h-100 align-items-center justify-content-center text-center">
+                <div class="col-lg-10 align-self-end">
+                    <h1 id="projectName" class="text-uppercase text-white font-weight-bold">
+                        IoT WebServer
+                    </h1>
+                    <hr class="divider my-4" />
+                </div>
+                <div class="col-lg-8 align-self-baseline">
+                    <p id="projectSubName" class="text-white-75 font-weight-light mb-5">
+                        ESP8266 WebServer test template
+                    </p>
+                    <a class="btn btn-primary btn-xl js-scroll-trigger" href="#api">Lets do this!</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- api -->
+    <section class="page-section bg-primary minh-100" id="api">
+        <div class="container">
+            <div class="row align-items-center justify-content-center text-center">
+                <div class="col-lg-11 text-center">
+                    <h2 class="text-white mt-0">Color Picker</h2>
+                    <hr class="divider light my-4" />
+
+                    <div class="sliderContainer">
+                        <div id="colorPicker"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row align-items-center justify-content-center text-center mt-5">
+                <div class="col-lg-11 text-center">
+                    <h2 class="text-white mt-0">Change Value</h2>
+                    <hr class="divider light my-4" />
+
+                    <div class="sliderContainer">
+                        <div class="range-slider">
+                            <span id="rs-bullet" class="rs-label">0</span>
+                            <input id="rs-range-line" class="rs-range" type="range" value="0" min="0" max="100" />
+                        </div>
+                        <div class="box-minmax"><span>0</span><span>100</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row align-items-center justify-content-center text-center mt-4">
+                <div class="col-12 text-center mt-4">
+                    <h2 class="text-white mt-0">Basic Functions</h2>
+                    <hr class="divider light my-4" />
+                </div>
+
+                <div class="col-sm-12 col-lg-6 mt-4">
+                    <button espbutton="buttonSetValue" class="btn btn-info btn-lg btn-block">
+                        Set Value
+                    </button>
+                </div>
+                <div class="col-sm-12 col-lg-6 mt-4">
+                    <button espbutton="buttonRestoreValue" type="button" class="btn btn-light btn-lg btn-block"
+                        id="btn-rest-b">
+                        Restore Value: 50%
+                    </button>
+                </div>
+
+                <div class="col-sm-12 col-lg-6 mt-4">
+                    <button espbutton="buttonChange" class="btn btn-secondary btn-lg btn-block" id="btn-change-a">
+                        Change Button
+                    </button>
+                </div>
+                <div class="col-sm-12 col-lg-6 mt-4">
+                    <button espbutton="buttonClick" class="btn btn-info btn-lg btn-block">
+                        Click Button
+                    </button>
+                </div>
+            </div>
+
+            <div class="row align-items-center justify-content-center text-center">
+                <div class="col-12 text-center mt-5">
+                    <h2 class="text-white mt-0">ESP8266 Functions</h2>
+                    <hr class="divider light my-4" />
+                </div>
+
+                <div class="col-sm-12 col-lg-6 mt-4">
+                    <button espbutton="_changeWiFiMode_" class="btn btn-info btn-lg btn-block" id="changeWiFiButton">
+                        Change WiFi mode
+                    </button>
+                </div>
+                <div class="col-sm-12 col-lg-6 mt-4">
+                    <button espbutton="_setWiFiMode_" class="btn btn-warning btn-lg btn-block" id="setWiFiButton">
+                        Set WiFi mode
+                    </button>
+                </div>
+            </div>
+
+            <form class="form-inline row align-items-center justify-content-center text-center" onsubmit="sendIP()"
+                action="">
+                <div class="col-sm-12 col-xl-4 mt-4">
+                    <button espbutton="_changeWiFiConn_" type="button" id="ipDynamic"
+                        class="btn btn-light btn-lg btn-block">
+                        DHCP connection
+                    </button>
+                </div>
+                <div class="form-group col-3 col-xl-1 mt-4 mb-0">
+                    <input class="form-control col-12" style="text-align: center" type="number" id="sip1" min="0"
+                        max="255" required />
+                </div>
+                <div class="form-group col-3 col-xl-1 mt-4 mb-0">
+                    <input class="form-control col-12" style="text-align: center" type="number" id="sip2" min="0"
+                        max="255" required />
+                </div>
+                <div class="form-group col-3 col-xl-1 mt-4 mb-0">
+                    <input class="form-control col-12" style="text-align: center" type="number" id="sip3" min="0"
+                        max="255" required />
+                </div>
+                <div class="form-group col-3 col-xl-1 mt-4 mb-0">
+                    <input class="form-control col-12" style="text-align: center" type="number" id="sip4" min="0"
+                        max="255" required />
+                </div>
+
+                <div class="col-sm-12 col-xl-4 mt-4">
+                    <button type="submit" id="ipStatic" class="btn btn-light btn-lg btn-block">
+                        Static connection
+                    </button>
+                </div>
+            </form>
+
+            <div class="row align-items-center justify-content-center text-center">
+                <div class="col-sm-12 col-lg-6 mt-4">
+                    <button espbutton="_restart_" class="btn btn-warning btn-lg btn-block">
+                        Restart ESP
+                    </button>
+                </div>
+                <div class="col-sm-12 col-lg-6 mt-4">
+                    <button espbutton="_turnOff_" class="btn btn-danger btn-lg btn-block">
+                        Turn OFF ESP
+                    </button>
+                </div>
+            </div>
+
+            <div class="row align-items-center justify-content-center text-center">
+                <a class="btn btn-light btn-xl js-scroll-trigger mt-5" href="#contact">Contact</a>
+            </div>
+        </div>
+    </section>
+    <!-- Contact-->
+    <section class="page-section minh-footer" id="contact">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <h2 class="mt-0">Let's Get In Touch!</h2>
+                    <hr class="divider my-4" />
+                    <p class="text-muted mb-5">
+                        Do you like my projects? Contact me and I will get back to you as
+                        soon as possible!
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 ml-auto text-center mb-lg-0">
+                    <i class="fas fa-phone fa-3x mb-3 text-muted"></i>
+                    <div>Email</div>
+                </div>
+                <div class="col-lg-4 mr-auto text-center">
+                    <i class="fas fa-envelope fa-3x mb-3 text-muted"></i>
+                    <a class="d-block" href="mailto:DaveFridayZF@gmail.com">DaveFridayZF@gmail.com</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer class="bg-light py-5">
+        <div class="container">
+            <div class="small text-center text-muted">
+                Copyright © 2020 - FridayCorp.
+            </div>
+        </div>
+    </footer>
+    <!-- Footer-->
+
+    <!-- Scripts -->
+    <script src="jquery.min.js"></script>
+    <script src="bootstrap.bundle.min.js"></script>
+    <script src="jquery.easing.min.js"></script>
+    <script src="iro.js"></script>
+    <script src="customScripts.js"></script>
+
+    <script>
+        if (
+            typeof window.initJquery == "undefined" ||
+            typeof window.initBootstrap == "undefined" ||
+            typeof window.initJqueryEasing == "undefined" ||
+            typeof window.initIro == "undefined" ||
+            typeof window.initCustomScript == "undefined"
+        )
+            window.location.reload();
+        (function ($) {
+            "use strict";
+            $('a.js-scroll-trigger[href*="#"]:not([href="#"])').click(function () {
+                if (
+                    location.pathname.replace(/^\//, "") ==
+                    this.pathname.replace(/^\//, "") &&
+                    location.hostname == this.hostname
+                ) {
+                    var target = $(this.hash);
+                    target = target.length
+                        ? target
+                        : $("[name=" + this.hash.slice(1) + "]");
+                    if (target.length) {
+                        $("html, body").animate(
+                            {
+                                scrollTop: target.offset().top - 72,
+                            },
+                            1000,
+                            "easeInOutExpo"
+                        );
+                        return false;
+                    }
+                }
+            });
+            $(".js-scroll-trigger").click(function () {
+                $(".navbar-collapse").collapse("hide");
+            });
+            $("body").scrollspy({
+                target: "#mainNav",
+                offset: 75,
+            });
+            var navbarCollapse = function () {
+                if ($("#mainNav").offset().top > 100) {
+                    $("#mainNav").addClass("navbar-scrolled");
+                } else {
+                    $("#mainNav").removeClass("navbar-scrolled");
+                }
+            };
+            navbarCollapse();
+            $(window).scroll(navbarCollapse);
+        })(jQuery);
+    </script>
+</body>
+
+</html>

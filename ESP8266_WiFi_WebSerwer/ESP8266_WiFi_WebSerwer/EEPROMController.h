@@ -1,38 +1,35 @@
+#pragma once
+
 #ifndef EEPROMController_h
 #define EEPROMController_h
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
 #include <EEPROM.h>
+#include "debug.h"
 
 class EEPROMController {
+private:
+	EEPROMController() { EEPROM.begin(EEPROM_SIZE); delay(10); };
+	EEPROMController(EEPROMController const&) {};
+	void operator=(EEPROMController const&) {};
+
 public:
-	EEPROMController();
-	bool saveWifi(String &, String &);
-	void readWifi(String &, String &);
-	void displayWiFi();
-	bool setConfig(bool);
-	void resetConfig();
-	bool getConfig();
-	bool isStaticAddres();
-	bool setStaticAddres(bool);
-	uint8_t getWifiMode();
-	bool setWifiMode(uint8_t mode);
-	bool setIpConfig();
-	IPAddress getIp();
-	IPAddress getGateway();
-	IPAddress getSubnet();
-	bool setIp(IPAddress&);
+
+	static EEPROMController* getInstance() {
+		static EEPROMController eeprom;
+		return &eeprom;
+	};
 
 	template<typename T>
-	bool setVar(int const address, const T &t) {
+	bool saveObject(const int address, const T& t) {
 		EEPROM.put(address, t);
 		return EEPROM.commit();
-	};
+	}
 
 	template<typename T>
-	T &getVar(int const address, T &t) {
+	T & getObject(const int address, T& t) {
 		return EEPROM.get(address, t);
-	};
+	}
 
 };
 #endif
