@@ -2,7 +2,7 @@
 
 //Project Info
 #define NAME "WebServer Controller"
-#define VERSION "Version 2.0.0 dev"
+#define VERSION "Version 2.0.0"
 
 //Serial Info
 #define ENABLE_DEBUG
