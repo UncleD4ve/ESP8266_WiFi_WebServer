@@ -54,6 +54,10 @@ void WebServerController::addWsEvent(const char * name, std::function<void(void 
 	_wsOnEvent[name] = func;
 };
 
+void WebServerController::addWsEvent_P(const __FlashStringHelper *name, std::function<void(void * arg, uint8_t *data, size_t len)> func) {
+	_wsOnEvent[name] = func;
+};
+
 void WebServerController::onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len) {
 	if (type == WS_EVT_CONNECT) {
 		debugf(PSTR("ws[%s][%u] connect\n"), server->url(), client->id());
@@ -117,10 +121,11 @@ void WebServerController::onWsEvent(AsyncWebSocket * server, AsyncWebSocketClien
 
 WebServerController& WebServerController::beginWsServer() {
 
+	
 	ws.enable(true);
 
 	ws.onEvent(std::bind(&WebServerController::onWsEvent, this, _1, _2, _3, _4, _5, _6));
-
+	dbln("xdxdxd1");
 	addWsEvent("_setStatic_", [&](void * arg, uint8_t *data, size_t len) {
 		IPAddress ip;
 		data[len - 1] = 0;
@@ -129,8 +134,8 @@ WebServerController& WebServerController::beginWsServer() {
 		storage::setWifiStStaticSettings(true);
 		wsAction = SERVER_WS_SAVE_RESTART;
 	});
-
-	addWsEvent(PSTR("_changeWiFiMode_"), [&](void * arg, uint8_t *data, size_t len) {
+	dbln("xdxdxd2");
+	addWsEvent(F("_changeWiFiMode_"), [&](void * arg, uint8_t *data, size_t len) {
 		wsAction = SERVER_WS_CHANGE_WIFI_MODE;
 	});
 
@@ -150,7 +155,7 @@ WebServerController& WebServerController::beginWsServer() {
 	addWsEvent(PSTR("_turnOff_"), [&](void * arg, uint8_t *data, size_t len) {
 		wsAction = SERVER_WS_TURN_OFF;
 	});
-
+	dbln("xdxdxd3");
 	server.addHandler(&ws);
 
 	debuglnF("WebSocet server started.");

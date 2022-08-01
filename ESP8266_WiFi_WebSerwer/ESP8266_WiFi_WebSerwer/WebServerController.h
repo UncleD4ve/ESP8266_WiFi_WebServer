@@ -34,8 +34,6 @@ public:
 	WebServerController& beginWsServer();
 	WebServerController& beginServer(bool editor = false);
 
-	void webSocketSend(char sign, uint8_t num);
-	void webSocketSendText(char * text);
 	void PreventEspStuck();
 	void resetConnectionByTime(uint16_t minutes = 5);
 
@@ -43,6 +41,8 @@ public:
 
 	void addWsInitial(const char*, std::function<String()>);
 	void addWsEvent(const char *, std::function<void(void *, uint8_t *, size_t)>);
+	void addWsInitial_P(const char*, std::function<String()>);
+	void addWsEvent_P(const char *, std::function<void(void *, uint8_t *, size_t)>);
 
 	WiFiController WiFiContr;
 	AsyncWebSocket ws;
