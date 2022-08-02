@@ -45,7 +45,6 @@ namespace storage {
 		debugf(PSTR("BootReason:       %dB\n"), ESP.getResetInfoPtr()->reason);
 		debugf(PSTR("BootReason name:  %sB\n"), ESP.getResetInfo().c_str());
 		debugf(PSTR("Heap:             %dB\n"), ESP.getFreeHeap());
-
 		debuglnF("---------------Initial---------------\n");
 	}
 
@@ -57,8 +56,8 @@ namespace storage {
 
 		eeprom->getObject(EEPROM_BOOT_ADDR, newData);
 
-		if (newData.magic_num == uint32_t(BOOT_MAGIC_NUM) ) {
-			if (strcmp_P(newData.project.version, PSTR(VERSION))+1) {
+		if (newData.magic_num == uint32_t(BOOT_MAGIC_NUM)) {
+			if (strcmp_P(newData.project.version, PSTR(VERSION)) == 0) {
 				data = newData;
 				debuglnF("OK");
 			}
@@ -103,19 +102,19 @@ namespace storage {
 
 		changed = true;
 
-		if(_onResetFun != nullptr)
+		if (_onResetFun != nullptr)
 			_onResetFun();
 		debuglnF("Storage reset");
 	}
 
 	bool save(bool force) {
-		if (force || changed) 
+		if (force || changed)
 			if (eeprom->saveObject(EEPROM_BOOT_ADDR, data)) {
 				debuglnF("Storage saved");
 				changed = false;
 				return true;
 			}
-			else 
+			else
 				debuglnF("Storage save ERROR!");
 		return false;
 	}
@@ -136,7 +135,7 @@ namespace storage {
 		debugf(PSTR("WiFi AP SSID:       %s\n"), data.wifi_ap.ssid);
 		debugf(PSTR("WiFi AP PASS:       ********\n"));
 		debugf(PSTR("WiFi AP IP:         %d.%d.%d.%d\n"), data.wifi_ap.ip[0], data.wifi_ap.ip[1], data.wifi_ap.ip[2], data.wifi_ap.ip[3]);
-		debugf(PSTR("WiFi AP Hidden:     %s\n\n"), data.wifi_ap.hidden?F("True"):F("False"));
+		debugf(PSTR("WiFi AP Hidden:     %s\n\n"), data.wifi_ap.hidden ? F("True") : F("False"));
 
 		debugf(PSTR("WiFi ST SSID:       %s\n"), data.wifi_st.ssid);
 		debugf(PSTR("WiFi ST PASS:       ********\n"));
@@ -144,7 +143,7 @@ namespace storage {
 		debugf(PSTR("WiFi ST Gateway:    %d.%d.%d.%d\n"), data.wifi_st.gateway[0], data.wifi_st.gateway[1], data.wifi_st.gateway[2], data.wifi_st.gateway[3]);
 		debugf(PSTR("WiFi ST Subnet:     %d.%d.%d.%d\n"), data.wifi_st.subnet[0], data.wifi_st.subnet[1], data.wifi_st.subnet[2], data.wifi_st.subnet[3]);
 		debugf(PSTR("WiFi ST Static:     %s\n\n"), data.wifi_st.static_ip ? F("True") : F("False"));
-		
+
 		debuglnF("---------------Storage---------------\n");
 
 	}
@@ -226,9 +225,5 @@ namespace storage {
 
 		changed = true;
 	}
-
-
-
-
 
 }
