@@ -41,16 +41,13 @@ public:
 
 	void addWsInitial(const char*, std::function<String()>);
 	void addWsEvent(const char *, std::function<void(void *, uint8_t *, size_t)>);
-	void addWsInitial_P(const char*, std::function<String()>);
-	void addWsEvent_P(const char *, std::function<void(void *, uint8_t *, size_t)>);
 
 	WiFiController WiFiContr;
 	AsyncWebSocket ws;
 private:
-	struct str_cmp{ bool operator()(char const *a, char const *b) const { return strcmp(a, b) < 0; } };
-
 	std::map<const char *, std::function<String()>> _wsInitial;
-	std::map<const char *, std::function<void(void *, uint8_t *, size_t)>, str_cmp> _wsOnEvent;
+	struct str_cmp { bool operator()(char const *a, char const *b) const { return strcmp(a, b) < 0; } };
+	std::map<const char *, std::function<void(void *, uint8_t *, size_t)>,str_cmp > _wsOnEvent;
 	
 	AsyncWebServer server;
 

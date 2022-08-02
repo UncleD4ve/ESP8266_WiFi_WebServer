@@ -51,7 +51,6 @@ void setup()
 
 	storage::print();
 
-
 	WebServerContr.addWsInitial(PSTR("initText"), []() {return "initialText"; });
 	WebServerContr.addWsInitial(PSTR("initseconds"), []() {return String(seconds); });
 	WebServerContr.addWsInitial(PSTR("initPosition"), []() {return String(position); });

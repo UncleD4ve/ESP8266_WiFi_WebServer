@@ -45,16 +45,11 @@ WebServerController& WebServerController::beginSPIFFS() {
 	return *this;
 }
 
-
 void WebServerController::addWsInitial(const char* name, std::function<String()> func) {
 	_wsInitial[name] = func;
 };
 
 void WebServerController::addWsEvent(const char * name, std::function<void(void * arg, uint8_t *data, size_t len)> func) {
-	_wsOnEvent[name] = func;
-};
-
-void WebServerController::addWsEvent_P(const __FlashStringHelper *name, std::function<void(void * arg, uint8_t *data, size_t len)> func) {
 	_wsOnEvent[name] = func;
 };
 
@@ -121,11 +116,9 @@ void WebServerController::onWsEvent(AsyncWebSocket * server, AsyncWebSocketClien
 
 WebServerController& WebServerController::beginWsServer() {
 
-	
 	ws.enable(true);
-
 	ws.onEvent(std::bind(&WebServerController::onWsEvent, this, _1, _2, _3, _4, _5, _6));
-	dbln("xdxdxd1");
+
 	addWsEvent("_setStatic_", [&](void * arg, uint8_t *data, size_t len) {
 		IPAddress ip;
 		data[len - 1] = 0;
@@ -134,28 +127,28 @@ WebServerController& WebServerController::beginWsServer() {
 		storage::setWifiStStaticSettings(true);
 		wsAction = SERVER_WS_SAVE_RESTART;
 	});
-	dbln("xdxdxd2");
-	addWsEvent(F("_changeWiFiMode_"), [&](void * arg, uint8_t *data, size_t len) {
+
+	addWsEvent("_changeWiFiMode_", [&](void * arg, uint8_t *data, size_t len) {
 		wsAction = SERVER_WS_CHANGE_WIFI_MODE;
 	});
 
-	addWsEvent(PSTR("_setWiFiMode_"), [&](void * arg, uint8_t *data, size_t len) {
+	addWsEvent("_setWiFiMode_", [&](void * arg, uint8_t *data, size_t len) {
 		wsAction = SERVER_WS_SET_WIFI_MODE;
 	});
 
-	addWsEvent(PSTR("_changeWiFiConn_"), [&](void * arg, uint8_t *data, size_t len) {
+	addWsEvent("_changeWiFiConn_", [&](void * arg, uint8_t *data, size_t len) {
 		storage::setWifiStStaticSettings(false);
 		wsAction = SERVER_WS_SAVE_RESTART;
 	});
 
-	addWsEvent(PSTR("_restart_"), [&](void * arg, uint8_t *data, size_t len) {
+	addWsEvent("_restart_", [&](void * arg, uint8_t *data, size_t len) {
 		wsAction = SERVER_WS_RESTART;
 	});
 
-	addWsEvent(PSTR("_turnOff_"), [&](void * arg, uint8_t *data, size_t len) {
+	addWsEvent("_turnOff_", [&](void * arg, uint8_t *data, size_t len) {
 		wsAction = SERVER_WS_TURN_OFF;
 	});
-	dbln("xdxdxd3");
+	
 	server.addHandler(&ws);
 
 	debuglnF("WebSocet server started.");
