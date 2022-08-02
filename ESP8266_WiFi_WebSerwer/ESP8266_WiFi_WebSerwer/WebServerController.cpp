@@ -12,9 +12,9 @@ WebServerController& WebServerController::beginOTA(uint8_t minutes, const char *
 	_otaTimer = minutes * 60e3;
 	_otaStatus = true;
 
-	ArduinoOTA.onStart([]() { debuglnF("Start");});
-	ArduinoOTA.onEnd([]() {debuglnF("End\n");});
-	ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {debugln((PSTR("Progress: ") + (progress / (total / 100))));});
+	ArduinoOTA.onStart([]() { debuglnF("Start"); });
+	ArduinoOTA.onEnd([]() {debuglnF("End\n"); });
+	ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {debugln((PSTR("Progress: ") + (progress / (total / 100)))); });
 	ArduinoOTA.onError([](ota_error_t error) {
 		debugF("Error: ");
 		if (error == OTA_AUTH_ERROR) { debuglnF("Auth Failed"); }
@@ -40,11 +40,10 @@ WebServerController& WebServerController::beginSPIFFS() {
 		}
 		debuglnF("End of content.");
 	}
-	
+
 	yield();
 	return *this;
 }
-
 
 void WebServerController::addWsInitial(const char* name, std::function<String()> func) {
 	_wsInitial[name] = func;
@@ -59,9 +58,9 @@ void WebServerController::onWsEvent(AsyncWebSocket * server, AsyncWebSocketClien
 		debugf(PSTR("ws[%s][%u] connect\n"), server->url(), client->id());
 
 		IPAddress ip((WiFi.getMode() == 2 ? storage::getWifiStSettings().ip : WiFi.localIP()));
-		
-		char systemMsg[150];	
-		snprintf_P(systemMsg, 150, PSTR("{\"name\":\"%s\",\"version\":\"%s\",\"wifiMode\":%d,\"staticIp\":\"%s\",\"isStatic\":%d"),storage::getProject().name, storage::getProject().version, storage::getWiFiMode(), ip.toString().c_str(), storage::getWifiStSettings().static_ip);
+
+		char systemMsg[150];
+		snprintf_P(systemMsg, 150, PSTR("{\"name\":\"%s\",\"version\":\"%s\",\"wifiMode\":%d,\"staticIp\":\"%s\",\"isStatic\":%d"), storage::getProject().name, storage::getProject().version, storage::getWiFiMode(), ip.toString().c_str(), storage::getWifiStSettings().static_ip);
 
 		String userMsg;
 		for (auto map : _wsInitial)
@@ -71,7 +70,7 @@ void WebServerController::onWsEvent(AsyncWebSocket * server, AsyncWebSocketClien
 		client->ping();
 
 		debugF("ws initial message: ");
-		debugf(PSTR("%s%s}\n"),systemMsg, userMsg.c_str());
+		debugf(PSTR("%s%s}\n"), systemMsg, userMsg.c_str());
 	}
 	else if (type == WS_EVT_DISCONNECT) {
 		debugf(PSTR("ws[%s][%u] disconnect\n"), server->url(), client->id());
@@ -91,7 +90,7 @@ void WebServerController::onWsEvent(AsyncWebSocket * server, AsyncWebSocketClien
 
 			if ((char)data[0] == '{' && (char)data[len - 1] == '}' && strchr((char*)data, ':') != NULL) {
 
-				data[len-1] = 0;
+				data[len - 1] = 0;
 				char * event = strtok((char*)data, ":");
 				uint8_t eventLen = strlen(event);
 
@@ -101,10 +100,10 @@ void WebServerController::onWsEvent(AsyncWebSocket * server, AsyncWebSocketClien
 					event++;
 				}
 				event++;
-				
+
 				auto e = _wsOnEvent.find(event);
 
-				if (e != _wsOnEvent.end()) 
+				if (e != _wsOnEvent.end())
 					e->second(arg, data + eventLen + 1, len - eventLen - 2);	// len - {"prop" - ':' - '}'
 				else {
 					debugf("Event %s not found. %d events available\n", event, _wsOnEvent.size());
@@ -118,13 +117,12 @@ void WebServerController::onWsEvent(AsyncWebSocket * server, AsyncWebSocketClien
 WebServerController& WebServerController::beginWsServer() {
 
 	ws.enable(true);
-
 	ws.onEvent(std::bind(&WebServerController::onWsEvent, this, _1, _2, _3, _4, _5, _6));
 
 	addWsEvent("_setStatic_", [&](void * arg, uint8_t *data, size_t len) {
 		IPAddress ip;
 		data[len - 1] = 0;
-		ip.fromString((char*)data+1);
+		ip.fromString((char*)data + 1);
 		storage::setWifiStStaticIpSettings(ip);
 		storage::setWifiStStaticSettings(true);
 		wsAction = SERVER_WS_SAVE_RESTART;
@@ -150,7 +148,7 @@ WebServerController& WebServerController::beginWsServer() {
 	addWsEvent(PSTR("_turnOff_"), [&](void * arg, uint8_t *data, size_t len) {
 		wsAction = SERVER_WS_TURN_OFF;
 	});
-
+	
 	server.addHandler(&ws);
 
 	debuglnF("WebSocet server started.");
@@ -161,11 +159,11 @@ WebServerController& WebServerController::beginWsServer() {
 
 WebServerController& WebServerController::beginServer(bool editor) {
 
-	server.on(PSTR("/heap"), HTTP_GET, [](AsyncWebServerRequest *request) {request->send(200, "text/plain", String(ESP.getFreeHeap()));});
+	server.on(PSTR("/heap"), HTTP_GET, [](AsyncWebServerRequest *request) {request->send(200, "text/plain", String(ESP.getFreeHeap())); });
 
 	server.serveStatic(PSTR("/"), SPIFFS, PSTR("/")).setDefaultFile(PSTR("index.html")).setCacheControl(PSTR("max-age=600"));
 
-	if(editor)
+	if (editor)
 		server.addHandler(new SPIFFSEditor(PSTR(SPIFFS_SSID), PSTR(SPIFFS_PASSWD)));
 
 	server.onNotFound([](AsyncWebServerRequest *request) {
@@ -222,7 +220,7 @@ WebServerController& WebServerController::beginServer(bool editor) {
 	server.begin();
 
 	debuglnF("HTML server started.");
-	
+
 	yield();
 	return *this;
 }
@@ -236,13 +234,13 @@ String WebServerController::formatBytes(size_t bytes) {
 		return String(bytes / 1024.0 / 1024.0) + F("MB");
 }
 
-void WebServerController::WebServerLoop(bool _PreventEspStuck , bool _resetConnectionByTime ) {
+void WebServerController::WebServerLoop(bool _PreventEspStuck, bool _resetConnectionByTime) {
 	yield();
 
 	if (WiFi.getMode() == 2)
 		WiFiContr.dnsLoop();
 
-	if(ws.enabled())
+	if (ws.enabled())
 		ws.cleanupClients();
 
 	if (_PreventEspStuck)
@@ -255,7 +253,7 @@ void WebServerController::WebServerLoop(bool _PreventEspStuck , bool _resetConne
 	{
 		ArduinoOTA.handle();
 		yield();
-		if (_otaTimer && millis() >= _otaTimer )
+		if (_otaTimer && millis() >= _otaTimer)
 		{
 			_otaStatus = false;
 			debuglnF("OTA server stoped.");
@@ -276,7 +274,7 @@ void WebServerController::WebServerLoop(bool _PreventEspStuck , bool _resetConne
 	case SERVER_WS_SAVE_RESTART:
 		wsAction = SERVER_WS_NULL;
 		if (storage::save());
-			WiFiContr.restartESP();
+		WiFiContr.restartESP();
 		break;
 	case SERVER_WS_RESTART:
 		wsAction = SERVER_WS_NULL;
@@ -302,7 +300,7 @@ void WebServerController::WebServerLoop(bool _PreventEspStuck , bool _resetConne
 void WebServerController::PreventEspStuck() {
 
 	if (millis() - dieTimer >= 3000) {
-		if (++dieCounter > 1) 
+		if (++dieCounter > 1)
 		{
 			debugf(PSTR("Stuck counter: %d/3\n"), dieCounter);
 		}

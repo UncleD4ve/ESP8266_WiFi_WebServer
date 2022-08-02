@@ -40,7 +40,7 @@ namespace storage {
 	}
 
 	void initialPrint() {
-		debuglnF("---------------Initial---------------");
+		debuglnF("\n---------------Initial---------------");
 		debugf(PSTR("MAC:              %s\n"), WiFi.macAddress().c_str());
 		debugf(PSTR("BootReason:       %dB\n"), ESP.getResetInfoPtr()->reason);
 		debugf(PSTR("BootReason name:  %sB\n"), ESP.getResetInfo().c_str());

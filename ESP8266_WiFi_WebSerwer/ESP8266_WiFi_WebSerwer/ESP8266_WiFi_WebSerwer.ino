@@ -28,7 +28,7 @@ enum wsEvents {
 	WS_NULL = 0,
 	WS_BUTTON_CLICK = 1,
 	WS_COLOR_PICKER = 2
-}; 
+};
 uint8_t wsEvent = WS_NULL;
 
 // End of example variables
@@ -50,7 +50,6 @@ void setup()
 	storage::load();
 
 	storage::print();
-
 
 	WebServerContr.addWsInitial(PSTR("initText"), []() {return "initialText"; });
 	WebServerContr.addWsInitial(PSTR("initseconds"), []() {return String(seconds); });
@@ -81,7 +80,7 @@ void setup()
 		debugf(PSTR("Change Button: %d\n"), changeButton);
 		WebServerContr.ws.printfAll_P(PSTR("{\"changeButton\":%d}"), changeButton);
 	});
-	
+
 	WebServerContr.addWsEvent("buttonSetValue", [](void * arg, uint8_t *data, size_t len) {
 		WebServerContr.ws.printfAll_P(PSTR("{\"saveA\":%d}"), position);
 	});

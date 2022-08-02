@@ -34,8 +34,6 @@ public:
 	WebServerController& beginWsServer();
 	WebServerController& beginServer(bool editor = false);
 
-	void webSocketSend(char sign, uint8_t num);
-	void webSocketSendText(char * text);
 	void PreventEspStuck();
 	void resetConnectionByTime(uint16_t minutes = 5);
 
@@ -47,10 +45,9 @@ public:
 	WiFiController WiFiContr;
 	AsyncWebSocket ws;
 private:
-	struct str_cmp{ bool operator()(char const *a, char const *b) const { return strcmp(a, b) < 0; } };
-
 	std::map<const char *, std::function<String()>> _wsInitial;
-	std::map<const char *, std::function<void(void *, uint8_t *, size_t)>, str_cmp> _wsOnEvent;
+	struct str_cmp { bool operator()(char const *a, char const *b) const { return strcmp(a, b) < 0; } };
+	std::map<const char *, std::function<void(void *, uint8_t *, size_t)>,str_cmp > _wsOnEvent;
 	
 	AsyncWebServer server;
 
