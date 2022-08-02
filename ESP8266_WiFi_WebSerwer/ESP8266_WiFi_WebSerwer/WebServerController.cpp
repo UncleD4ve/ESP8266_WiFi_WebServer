@@ -117,6 +117,7 @@ void WebServerController::onWsEvent(AsyncWebSocket * server, AsyncWebSocketClien
 WebServerController& WebServerController::beginWsServer() {
 
 	ws.enable(true);
+
 	ws.onEvent(std::bind(&WebServerController::onWsEvent, this, _1, _2, _3, _4, _5, _6));
 
 	addWsEvent("_setStatic_", [&](void * arg, uint8_t *data, size_t len) {
